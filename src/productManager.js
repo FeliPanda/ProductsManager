@@ -1,3 +1,4 @@
+
 const fs = require('fs');
 
 class ProductManager {
@@ -12,11 +13,17 @@ class ProductManager {
             return console.error("Error: Missing Data");
         }
 
+        // Verificar si el código ya existe en algún producto
         if (this.products.some((product) => product.code === code)) {
             return console.error("Error: Product CODE already exists");
         }
 
-        const id = this.nextId++;
+        let id = 1; // Inicializar el ID en 1
+        // Encontrar el máximo ID actual y sumarle 1 para obtener un nuevo ID único
+        if (this.products.length > 0) {
+            id = Math.max(...this.products.map(product => product.id)) + 1;
+        }
+
         const product = { id, title, description, price, thumbnail, code, stock };
 
         this.products.push(product);
@@ -29,6 +36,7 @@ class ProductManager {
         }
         return product;
     }
+
 
     async readProducts() {
         try {
