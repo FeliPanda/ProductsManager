@@ -43,14 +43,5 @@
 		"thumbnail": "Sin imagen",
 		"code": "mnb897",
 		"stock": 85
-	},
-	{
-		"id": 6,
-		"title": "turun",
-		"description": "turun turun",
-		"price": 506,
-		"thumbnail": "imagen.jpg",
-		"code": "chango123",
-		"stock": 69
 	}
 ]
