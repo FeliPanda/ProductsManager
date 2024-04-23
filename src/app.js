@@ -6,30 +6,41 @@ const app = express();
 const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 
-// conectando a mongoDB
+const DbProductManager = require('./productManager');
+const CartManager = require('./CartManager');
 
-mongoose.connect('mongodb+srv://lfver91:Rockmon123@coder-ecommerce.2lyxyye.mongodb.net/?retryWrites=true&w=majority', {
 
-})
-    .then(() => {
-        console.log('Connected to MongoDB');
-    })
-    .catch((error) => {
-        console.error('Error connecting to MongoDB:', error);
-    });
+app.engine('handlebars', handlebars.engine())
+app.set('views', `${__dirname}/views`)
+app.set('view engine', 'handlebars')
 
-//configurar handlebars
-app.engine('handlebars', handlebars.engine({
-    defaultLayout: false // Set 'home' as the default layout
-}));
-app.set('views', `${__dirname}/views`); // Set the views directory
-app.set('view engine', 'handlebars');
+
 
 // rutas
 app.use('/', productsRouter);
 app.use('/api/carts/', cartsRouter);
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+
+// Instanciar y configurar CartManager
+const cartManager = new CartManager();
+app.set('cartManager', cartManager);
+
+const main = async () => {
+
+    // conectando a mongoDB
+    await mongoose.connect('mongodb+srv://lfver91:Rockmon123@coder-ecommerce.2lyxyye.mongodb.net/?retryWrites=true&w=majority', {
+        dbName: 'Coder-Ecommerce'
+    })
+
+    const productManager = new DbProductManager()
+    await productManager.prepare()
+    app.set('productManager', productManager)
+
+
+    const PORT = process.env.PORT || 8080;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+main()

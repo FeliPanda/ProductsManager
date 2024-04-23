@@ -2,7 +2,6 @@ const Cart = require('./models/carts.model.js');
 
 class CartManager {
 
-
     async getCarts() {
         return await Cart.find();
     }
@@ -12,16 +11,32 @@ class CartManager {
             products: []
         });
         await newCart.save();
-        return newCart;
+        // Devolver solo el ID y los productos del nuevo carrito
+        return {
+            _id: newCart._id,
+            products: newCart.products
+        };
     }
 
+
+
     async addProductToCart(cartId, productId, quantity) {
-        const cart = await Cart.findById(cartId);
+        let cart = await Cart.findById(cartId);
+
+        // Si el carrito no existe, crear uno nuevo
         if (!cart) {
-            throw new Error("Cart not found");
+            cart = await this.addCart();
         }
 
-        cart.products.push({ product: productId, quantity });
+        // Verificar si el producto ya está en el carrito
+        const existingProduct = cart.products.find(product => product.product.toString() === productId);
+
+        if (existingProduct) {
+            existingProduct.quantity += quantity; // Incrementar la cantidad si el producto ya está en el carrito
+        } else {
+            cart.products.push({ product: productId, quantity }); // Agregar el producto al carrito si no está presente
+        }
+
         await cart.save();
     }
 }
