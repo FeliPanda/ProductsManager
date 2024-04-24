@@ -1,94 +1,111 @@
-// const express = require("express");
-//const ProductManager = require("../productManager");
-// const router = express.Router();
+
+// const { Router } = require('express')
+// const { Queries } = require('../queries');
 // const mongoose = require('mongoose');
-const { Router } = require('express')
-const router = Router()
-const mongoose = require('mongoose');
+
+// const router = Router()
+// const queries = new Queries();
+
+// router.get("/", async (req, res) => {
+//     try {
+//         const productManager = req.app.get('productManager');
+//         const { limit = 10, page = 1 } = req.query;
+
+//         const products = await productManager.getProducts({ limit, page });
+
+//         if (!products.length) {
+//             return res.status(204).send("No products found");
+//         }
+
+//         res.render('productList', { products });
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
 
 
-router.get("/", async (req, res) => {
-    try {
-        const productManager = req.app.get('productManager')
-        const product = await productManager.getProducts(req.query)
-        console.log("productos de la BD", product)
-        res.status(200).json(product)
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(400).json({ success: false })
+// router.get("/:pid", async (req, res) => {
+//     try {
+//         const productId = req.params.pid;
 
-    }
-});
+//         if (!mongoose.Types.ObjectId.isValid(productId)) {
+//             return res.status(400).send("Invalid Product ID");
+//         }
 
-router.get("/:pid", async (req, res) => {
-    try {
-        const productId = req.params.pid;
+//         const productManager = req.app.get('productManager');
+//         const product = await productManager.getProductById(productId);
 
-        // Verificar si el ID es válido
-        if (!mongoose.Types.ObjectId.isValid(productId)) {
-            return res.status(400).send("Invalid Product ID");
-        }
+//         if (!product) {
+//             return res.status(404).send("Product not found");
+//         }
 
-        const productManager = req.app.get('productManager');
-        const product = await productManager.getProductById(productId); // Obtener el producto por ID
-
-        if (!product) {
-            return res.status(404).send("Product not found");
-        }
-
-        res.send(product.toObject({ virtuals: true })); // Convertir a objeto de JavaScript
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).send("Internal Server Error");
-    }
-});
+//         res.render('productDetail', { product });
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
 
-router.post("/", async (req, res) => {
-    try {
-        const productManager = req.app.get('productManager'); // Obtener productManager
+// router.post("/", async (req, res) => {
+//     try {
+//         const productManager = req.app.get('productManager'); // Obtener productManager
 
-        const { title, description, price, thumbnail, code, stock } = req.body;
-        const newProduct = await productManager.addProduct(title, description, price, thumbnail, code, stock);
+//         const { title, description, price, thumbnail, code, stock } = req.body;
+//         const newProduct = await productManager.addProduct(title, description, price, thumbnail, code, stock);
 
-        res.status(201).send(newProduct);
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(400).send("Bad Request");
-    }
-});
+//         res.status(201).send(newProduct);
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(400).send("Bad Request");
+//     }
+// });
 
-router.put('/:pid', async (req, res) => {
-    try {
-        const productManager = req.app.get('productManager'); // Obtener productManager
+// router.put('/:pid', async (req, res) => {
+//     try {
+//         const productManager = req.app.get('productManager'); // Obtener productManager
 
-        const productId = req.params.pid;
-        const updatedFields = req.body;
+//         const productId = req.params.pid;
+//         const updatedFields = req.body;
 
-        await productManager.updateProduct(productId, updatedFields);
+//         await productManager.updateProduct(productId, updatedFields);
 
-        res.status(200).send("Product updated successfully");
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).send("Internal Server Error");
-    }
-});
+//         res.status(200).send("Product updated successfully");
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
-router.delete('/:pid', async (req, res) => {
-    try {
-        const productManager = req.app.get('productManager'); // Obtener productManager
+// router.delete('/:pid', async (req, res) => {
+//     try {
+//         const productManager = req.app.get('productManager'); // Obtener productManager
 
-        const productId = req.params.pid;
+//         const productId = req.params.pid;
 
-        await productManager.deleteProduct(productId);
+//         await productManager.deleteProduct(productId);
 
-        res.status(200).send("Product deleted successfully");
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).send("Internal Server Error");
-    }
-});
+//         res.status(200).send("Product deleted successfully");
+//     } catch (error) {
+//         console.error("Error:", error);
+//         res.status(500).send("Internal Server Error");
+//     }
+// });
 
+
+// module.exports = router;
+
+
+
+
+const express = require('express');
+const router = express.Router();
+const productsController = require('../controllers/products.controller');
+
+router.get('/', productsController.getProducts);
+router.get('/:id', productsController.getProductById);
+router.post('/:pid/add-to-cart', productsController.addToCartFromProductList);
 
 module.exports = router;

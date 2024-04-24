@@ -10,7 +10,6 @@ const cartSchema = new mongoose.Schema({
     }]
 });
 
-// Añadir método virtual para transformar el objeto a JSON
 cartSchema.virtual('toJSON').get(function () {
     return {
         _id: this._id,

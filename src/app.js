@@ -7,19 +7,16 @@ const handlebars = require('express-handlebars');
 const mongoose = require('mongoose');
 
 const DbProductManager = require('./productManager');
-const CartManager = require('./CartManager');
+const CartManager = require('./cartManager');
 
 
 app.engine('handlebars', handlebars.engine())
 app.set('views', `${__dirname}/views`)
 app.set('view engine', 'handlebars')
 
-
-
 // rutas
 app.use('/', productsRouter);
 app.use('/api/carts/', cartsRouter);
-
 
 // Instanciar y configurar CartManager
 const cartManager = new CartManager();

@@ -23,45 +23,28 @@ class ProductManager {
         return product;
     }
 
-    async getProducts(filters = {}) {
-        const { title = null, code = null } = filters; // Aquí defines los filtros que quieres aplicar
+    async getProducts({ limit = 10, page = 1, sort = 'asc' }) {
+        const skip = (page - 1) * limit;
 
-        const queryConditions = [];
-
-        if (title) {
-            queryConditions.push({
-                title: {
-                    $regex: `^${title}`,
-                    $options: 'i'
-                }
-            });
+        const sortOptions = {};
+        if (sort === 'asc') {
+            sortOptions.price = 1;
+        } else if (sort === 'desc') {
+            sortOptions.price = -1;
         }
 
-        if (code) {
-            queryConditions.push({
-                code: {
-                    $regex: `^${code}`,
-                    $options: 'i'
-                }
-            });
-        }
+        const products = await ProductModel.find()
+            .skip(skip)
+            .limit(Number(limit))
+            .sort(sortOptions);  // Aplicar el ordenamiento aquí
 
-        const products = queryConditions.length
-            ? await ProductModel.find({ $and: queryConditions }) // Aplicar filtros si existen
-            : await ProductModel.find(); // Obtener todos los productos si no hay filtros
-
-        return products.map(product => product.toObject({ virtuals: true })); // Convertir a objetos de JavaScript
+        return products.map(product => product.toObject({ virtuals: true }));
     }
 
 
-    // async getProducts() {
-    //     const products = await ProductModel.find();
-    //     return products.map(product => product.toObject());
-    // }
-
-
     async getProductById(id) {
-        return await ProductModel.findById(id);
+        const product = await ProductModel.findById(id).lean();
+        return product;
     }
 
     async updateProduct(id, updatedFields) {
