@@ -1,9 +1,7 @@
-<!-- views/productList.hbs -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Product List</title>
-    <script src="../script.js" defer></script>
 </head>
 <body>
     <h1>Product List</h1>
@@ -19,6 +17,38 @@
     {{/each}}
     </ul>
 
-    <script src="../script.js"></script>
+    <script>
+        console.log('Se activo el script ')
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const productId = event.target.getAttribute('data-product-id'); // ID del producto
+                const cartId = '6627305a076279b6e88cdc9f'; // ID del carrito, puedes obtenerlo de donde corresponda
+                const quantity = 1; // Cantidad, puedes modificarlo según lo que necesites
+
+                try {
+                    const response = await fetch(`/api/carts/${cartId}/add-to-cart`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ productId, quantity })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error adding product to cart: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Cart updated:', data);
+                    // Aquí puedes actualizar la UI para reflejar el producto agregado al carrito
+                } catch (error) {
+                    console.error('Error:', error);
+                    // Aquí puedes mostrar un mensaje de error al usuario si es necesario
+                }
+            });
+        });
+    </script>
 </body>
 </html>

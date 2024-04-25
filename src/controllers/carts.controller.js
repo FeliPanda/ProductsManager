@@ -1,27 +1,33 @@
 const CartManager = require('../cartManager');
+const Product = require('../models/products.model');
 const cartManager = new CartManager();
 
 exports.getCart = async (req, res) => {
     try {
         const cartId = req.params.cid;
-        const cart = await cartManager.getCart(cartId).populate('products.product'); // Aquí usamos populate para resolver la relación
+        const cart = await cartManager.getCart(cartId).populate('products.product');
 
         if (!cart) {
             return res.status(404).send("Cart not found");
         }
 
-        const transformedProducts = cart.products.map(item => ({
-            title: item.product.title,
-            price: item.product.price,
-            quantity: item.quantity
+        const transformedProducts = await Promise.all(cart.products.map(async item => {
+            const product = await productManager.getProductById(item.product._id);
+            return {
+                title: product.title,
+                description: product.description,
+                price: product.price,
+                quantity: item.quantity
+            };
         }));
 
-        res.render('cart', { products: transformedProducts });  // Renderizar la vista 'cart' con los productos del carrito
+        res.render('cart', { products: transformedProducts });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).send("Internal Server Error");
     }
 };
+
 
 exports.updateCart = async (req, res) => {
     try {
@@ -79,27 +85,51 @@ exports.clearCart = async (req, res) => {
     }
 };
 
-
 exports.addToCart = async (req, res) => {
     try {
-        const cartId = req.params.cid;
+        const { cartId } = req.params;
         const { productId, quantity } = req.body;
 
-        console.log("addToCart endpoint called"); // Comprobar si el endpoint se llama correctamente
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
 
-        const updatedCart = await cartManager.addToCart(cartId, productId, quantity);
+        const updatedProduct = await cartManager.addToCart(cartId, productId, quantity);
 
-        console.log("Updated cart:", updatedCart); // Comprobar si el carrito se actualiza correctamente
-
-        if (updatedCart) {
-            res.status(200).json(updatedCart);
+        if (updatedProduct) {
+            res.status(200).json(updatedProduct);
         } else {
             res.status(404).json({ message: "Cart not found" });
         }
     } catch (error) {
         console.error("Error:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).send("Internal Server Error");
     }
 };
+
+exports.getSpecificCart = async (req, res) => {
+    try {
+        const cartId = req.params.cid;
+        const cart = await cartManager.getCart(cartId);
+
+        if (!cart) {
+            return res.status(404).send("Cart not found");
+        }
+
+        const transformedProducts = cart.products.map(item => ({
+            title: item.product.title,
+            price: item.product.price,
+            quantity: item.quantity
+        }));
+
+        res.render('cart', { products: transformedProducts });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+
 
 

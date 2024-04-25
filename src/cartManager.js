@@ -1,4 +1,5 @@
 const Cart = require('./models/carts.model.js');
+const { ObjectId } = require('mongoose').Types;
 
 class CartManager {
 
@@ -14,11 +15,12 @@ class CartManager {
         const newCart = new Cart({
             products: []
         });
+
+        // Elimina el _id para evitar el error de clave duplicada
+        delete newCart._id;
+
         await newCart.save();
-        return {
-            _id: newCart._id,
-            products: newCart.products
-        };
+        return newCart;
     }
 
     async updateCart(cartId, products) {
@@ -69,22 +71,26 @@ class CartManager {
     }
 
     async addToCart(cartId, productId, quantity) {
-        let cart = await Cart.findById(cartId).populate('products.product'); // Asegúrate de usar populate para resolver la relación
+        let cart = await Cart.findById(cartId).populate('products.product');
 
         if (!cart) {
-            cart = await this.addCart();
+            const newCart = await this.addCart();
+            cart = newCart;
         }
 
-        const existingProduct = cart.products.find(product => product.product._id.toString() === productId);
+        const existingProductIndex = cart.products.findIndex(product => product.product._id.toString() === productId);
 
-        if (existingProduct) {
-            existingProduct.quantity += quantity;
+        if (existingProductIndex !== -1) {
+            cart.products[existingProductIndex].quantity += quantity;
         } else {
             cart.products.push({ product: productId, quantity });
         }
 
         await cart.save();
-        return cart;
+
+        // Devuelve solo el producto y la cantidad que se agregó
+        const updatedProduct = cart.products.find(product => product.product._id.toString() === productId);
+        return updatedProduct;
     }
 }
 

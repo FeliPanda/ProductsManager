@@ -1,4 +1,3 @@
-<!-- views/cart.hbs -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,9 +8,11 @@
     <ul>
     {{#each products}}
         <li>
-            <h2>{{this.product.title}}</h2>
-            <p>Price: ${{this.product.price}}</p>
+            <h2>{{this.title}}</h2>
+            <p>Description: {{this.description}}</p>
+            <p>Price: ${{this.price}}</p>
             <p>Quantity: {{this.quantity}}</p>
+            
         </li>
     {{/each}}
     </ul>

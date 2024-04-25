@@ -9,6 +9,17 @@ const mongoose = require('mongoose');
 const DbProductManager = require('./productManager');
 const CartManager = require('./cartManager');
 
+//quitar favicon
+app.use((req, res, next) => {
+    if (req.originalUrl === '/favicon.ico') {
+        res.status(204).json({ nope: true });
+    } else {
+        next();
+    }
+});
+
+// Middleware para parsear el cuerpo de las solicitudes
+app.use(express.json());
 
 app.engine('handlebars', handlebars.engine())
 app.set('views', `${__dirname}/views`)
@@ -16,7 +27,7 @@ app.set('view engine', 'handlebars')
 
 // rutas
 app.use('/', productsRouter);
-app.use('/api/carts/', cartsRouter);
+app.use('/api/carts', cartsRouter); // <-- Cambio aquí
 
 // Instanciar y configurar CartManager
 const cartManager = new CartManager();

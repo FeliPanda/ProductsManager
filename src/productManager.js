@@ -47,6 +47,12 @@ class ProductManager {
         return product;
     }
 
+    async getProductByTitle(title) {
+        const product = await ProductModel.findOne({ title }).lean();
+        return product;
+    }
+
+
     async updateProduct(id, updatedFields) {
         const product = await ProductModel.findById(id);
         if (!product) {
