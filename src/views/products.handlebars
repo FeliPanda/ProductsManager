@@ -1,0 +1,24 @@
+<!-- views/products.hbs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Product List</title>
+    <script src="../script.js" defer></script>
+</head>
+<body>
+    <h1>Product List</h1>
+    <ul>
+    {{#each products}}
+        <li>
+            <h2>{{title}}</h2>
+            <p>Description: {{description}}</p>
+            <p>Price: ${{price}}</p>
+            
+            <button data-product-id="{{_id}}">Add to Cart</button>
+        </li>
+    {{/each}}
+    </ul>
+
+    {{!-- <script src="../script.js"></script> --}}
+</body>
+</html>
