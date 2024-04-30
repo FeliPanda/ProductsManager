@@ -1,14 +1,26 @@
 const LocalStrategy = require('passport-local').Strategy;
+const User = require('../models/user.model');
 
 module.exports = function (passport) {
     passport.use(new LocalStrategy(
         { usernameField: 'email' },
         async function (email, password, done) {
-            // Aquí tu lógica para autenticar al usuario
-            if (email === 'soyunpanda@pandas.com' && password === 'panditas123') {
-                return done(null, { id: 1, email: 'soyunpanda@pandas.com', role: 'admin' });
-            } else {
-                return done(null, false, { message: 'Incorrect email or password' });
+            try {
+                const user = await User.findOne({ email });
+
+                if (!user) {
+                    return done(null, false, { message: 'User not found' });
+                }
+
+                const isMatch = await user.comparePassword(password);
+
+                if (isMatch) {
+                    return done(null, user);
+                } else {
+                    return done(null, false, { message: 'Incorrect password' });
+                }
+            } catch (error) {
+                return done(error);
             }
         }
     ));
@@ -17,8 +29,12 @@ module.exports = function (passport) {
         done(null, user.id);
     });
 
-    passport.deserializeUser(function (id, done) {
-        // Aquí tu lógica para buscar al usuario por ID y devolverlo
-        done(null, { id: 1, email: 'soyunpanda@pandas.com', role: 'admin' });
+    passport.deserializeUser(async function (id, done) {
+        try {
+            const user = await User.findById(id);
+            done(null, user);
+        } catch (error) {
+            done(error);
+        }
     });
 };

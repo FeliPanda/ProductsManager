@@ -1,41 +1,54 @@
 const passport = require('passport');
-const userManager = require('../userManager');
+const User = require('../models/user.model');
+const Joi = require('joi');
+
+const registerSchema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+});
 
 exports.getLogin = (req, res) => {
     res.render('login'); // Renderiza la vista de login
 };
 
-exports.postLogin = (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/products', // Redirige a la vista de productos si el login es exitoso
-        failureRedirect: '/auth/login', // Redirige de nuevo al login si hay un error
-    })(req, res, next);
-};
+exports.postLogin = passport.authenticate('local', {
+    successRedirect: '/products', // Redirige a la vista de productos si el login es exitoso
+    failureRedirect: '/auth/login', // Redirige de nuevo al login si hay un error
+});
 
 exports.getRegister = (req, res) => {
     res.render('register'); // Renderiza la vista de registro
 };
 
 exports.postRegister = async (req, res) => {
-    const { email, password, confirmPassword } = req.body;
-
-    // Verificar si las contraseñas coinciden
-    if (password !== confirmPassword) {
-        return res.status(400).send('Passwords do not match');
-    }
-
     try {
-        // Crear un nuevo usuario utilizando el UserManager
-        const newUser = await userManager.createUser(email, password);
+        // Verificar si el correo electrónico se está recibiendo correctamente en el servidor
+        console.log(req.body.email);
+
+        // Validar los datos del usuario con Joi
+        const { error, value } = registerSchema.validate(req.body);
+        if (error) {
+            return res.status(400).send(error.details[0].message);
+        }
+
+        // Verificar si ya existe un usuario con el mismo correo electrónico
+        const existingUser = await User.findOne({ email: value.email });
+        if (existingUser) {
+            return res.status(400).send('Email already exists!');
+        }
+
+        // Crear un nuevo usuario
+        const newUser = await User.create({ email: value.email, password: value.password });
         res.redirect('/auth/login'); // Redirigir al usuario al login después de registrarse
     } catch (error) {
-        // Manejar el error (por ejemplo, si el correo electrónico ya está en uso)
+        // Manejar el error
         console.error(error);
         res.status(500).send('Error registering user');
     }
 };
 
 exports.logout = (req, res) => {
-    req.logout();               // Método de Passport para logout
-    res.redirect('/auth/login'); // Redirige al login después del logout
+    req.logout();
+    res.redirect('/auth/login');
 };

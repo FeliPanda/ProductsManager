@@ -2,17 +2,6 @@
 const ProductManager = require('../productManager');
 const productManager = new ProductManager();
 
-// exports.getProducts = async (req, res) => {
-//     try {
-//         const { limit = 10, page = 1 } = req.query;
-//         const products = await productManager.getProducts({ limit, page });
-//         res.render('productList', { products });
-//     } catch (error) {
-//         console.error("Error:", error);
-//         res.status(500).send("Internal Server Error");
-//     }
-// };
-
 exports.getProducts = async (req, res) => {
     try {
         const { limit = 10, page = 1 } = req.query;

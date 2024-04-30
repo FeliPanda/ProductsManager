@@ -1,5 +1,6 @@
 const CartManager = require('../cartManager');
 const Product = require('../models/products.model');
+
 const cartManager = new CartManager();
 
 exports.getCart = async (req, res) => {
